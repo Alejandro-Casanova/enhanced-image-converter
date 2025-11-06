@@ -222,6 +222,8 @@ class ImageProcessor:
                     image.save(output_path, format=format_name, optimize=optimize)
                 elif format_name == "WEBP":
                     image.save(output_path, format=format_name, quality=quality, lossless=quality > 90)
+                elif format_name == "BMP":
+                    image.convert(mode='P', colors=16).save(output_path, format=format_name)
                 else:
                     image.save(output_path, format=format_name)
 
