@@ -1,8 +1,9 @@
 import logging
 import os
 import threading
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageDraw
 from PIL.Image import Image as PILImage
+from PIL.ImageDraw import ImageDraw as PILImageDraw
 
 class ImageProcessor:
     def __init__(self) -> None:
@@ -36,6 +37,10 @@ class ImageProcessor:
             if options["crop"]:
                 img = img.crop((options["crop_left"], options["crop_top"],
                     options["crop_right"], options["crop_bottom"]))
+
+            # Add border
+            img_draw: PILImageDraw = ImageDraw.Draw(img)  
+            img_draw.rectangle((0, 0, img.width - 1, img.height - 1), outline ="red")
 
             # Process transparency and colors
             if options["background_mode"] == "custom":
