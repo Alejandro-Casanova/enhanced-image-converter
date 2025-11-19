@@ -19,6 +19,10 @@ PRESETS = {}
 APP_VERSION = "1.0.0"
 CREATOR_STRING = "Created by Vinay Ahari"
 
+APP_ICON_PATH_WINDOWS = "assets/sample.ico"  # Path to the application icon
+APP_ICON_PATH_LINUX = "icon.png"  # Path to the application icon for Linux/Mac
+APP_ICON_PATH = APP_ICON_PATH_WINDOWS if os.name == 'nt' else APP_ICON_PATH_LINUX
+
 class App:
     def __init__(self, root: tk.Tk):
         self.root: tk.Tk = root
@@ -31,10 +35,12 @@ class App:
 
         # Set icon if available
         try:
-            if os.name == 'nt':  # Windows
-                self.root.iconbitmap('icon.ico')
+            if not os.path.isfile(APP_ICON_PATH):
+                self._logger.warning(f"Icon file not found: {APP_ICON_PATH}")
+            elif os.name == 'nt':  # Windows
+                self.root.iconbitmap(APP_ICON_PATH_WINDOWS)
             else:  # Linux/Mac
-                icon = tk.PhotoImage(file='icon.png')
+                icon = tk.PhotoImage(file=APP_ICON_PATH_LINUX)
                 self.root.iconphoto(True, icon)
         except Exception as e:
             self._logger.error(f"Failed to set icon: {e}", exc_info=True)
@@ -528,6 +534,9 @@ class App:
             if os.name == 'nt':
                 self.root.drop_target_register("DND_Files")
                 self.root.dnd_bind('<<Drop>>', self.handle_drop)
+        except AttributeError:
+            # If the dnd methods are not available, just pass
+            self._logger.warning("Drag and drop not supported. Additional libraries may be required.")
         except Exception as e:
             # If drag and drop is not available, just pass
             self._logger.error(f"Drag and drop setup failed: {e}", exc_info=True)
