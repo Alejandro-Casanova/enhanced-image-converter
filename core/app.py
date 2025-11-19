@@ -9,6 +9,8 @@ from tkinter import colorchooser
 from tkinter import simpledialog
 import webbrowser
 
+from PIL.Image import Image as PILImage
+
 from core.image.processor import ImageProcessor
 from core.settings.manager import SettingsManager
 
@@ -19,9 +21,10 @@ PRESETS = {}
 APP_VERSION = "1.0.0"
 CREATOR_STRING = "Created by Vinay Ahari"
 
-APP_ICON_PATH_WINDOWS = "assets/sample.ico"  # Path to the application icon
-APP_ICON_PATH_LINUX = "icon.png"  # Path to the application icon for Linux/Mac
-APP_ICON_PATH = APP_ICON_PATH_WINDOWS if os.name == 'nt' else APP_ICON_PATH_LINUX
+APP_ICON_PATH_ICO = "assets/sample_icon.ico"
+APP_ICON_PATH_PNG = "assets/sample_icon.png"
+APP_ICON_PATH = APP_ICON_PATH_ICO if os.name == 'nt' else APP_ICON_PATH_PNG
+APP_LOGO_PATH_PNG = "assets/sample_logo.png"
 
 class App:
     def __init__(self, root: tk.Tk):
@@ -38,9 +41,9 @@ class App:
             if not os.path.isfile(APP_ICON_PATH):
                 self._logger.warning(f"Icon file not found: {APP_ICON_PATH}")
             elif os.name == 'nt':  # Windows
-                self.root.iconbitmap(APP_ICON_PATH_WINDOWS)
+                self.root.iconbitmap(APP_ICON_PATH)
             else:  # Linux/Mac
-                icon = tk.PhotoImage(file=APP_ICON_PATH_LINUX)
+                icon = tk.PhotoImage(file=APP_ICON_PATH)
                 self.root.iconphoto(True, icon)
         except Exception as e:
             self._logger.error(f"Failed to set icon: {e}", exc_info=True)
@@ -776,7 +779,7 @@ class App:
                 self.root.after(0, lambda id=item_id: self.queue_list.item(id, values=(file_path, "Processing")))
 
                 # Load image
-                img = self.processor.load_image(file_path)
+                img: PILImage = self.processor.load_image(file_path)
 
                 # Get processing options
                 options = self.get_processing_options()
@@ -1456,15 +1459,15 @@ class App:
 
         # App icon
         try:
-            if os.name == 'nt':  # Windows
-                logo = tk.PhotoImage(file='icon.png')
+            if not os.path.isfile(APP_LOGO_PATH_PNG):
+                self._logger.warning(f"Logo file not found: {APP_LOGO_PATH_PNG}")
+            else:
+                logo = tk.PhotoImage(file=APP_LOGO_PATH_PNG)
+                # Resize the image to a smaller size for the about dialog
+                logo = logo.subsample(6, 6)  # Reduce by half in both dimensions
                 logo_label = ttk.Label(about, image=logo)
-                logo_label.image = logo  # Keep a reference
-                logo_label.pack(pady=10)
-            else:  # Linux/Mac
-                logo = tk.PhotoImage(file='icon.png')
-                logo_label = ttk.Label(about, image=logo)
-                logo_label.image = logo  # Keep a reference
+                # Keep a reference to prevent garbage collection
+                logo_label.image = logo # type: ignore
                 logo_label.pack(pady=10)
         except Exception as e:
             self._logger.error(f"Failed to load about icon: {e}", exc_info=True)
