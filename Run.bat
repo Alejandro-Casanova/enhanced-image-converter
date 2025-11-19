@@ -12,7 +12,7 @@ ECHO Virtual environment activated.
 
 REM Run the main application
 ECHO Starting the application...
-python enhanced_image_converter.py
+python main.py
 
 REM Check error level
 IF %ERRORLEVEL% NEQ 0 (
