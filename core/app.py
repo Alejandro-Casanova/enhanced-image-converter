@@ -86,6 +86,7 @@ class App:
 
         # Tolerance
         self.tolerance_var = tk.IntVar(value=15)
+
         # Resize options
         self.resize_var = tk.BooleanVar(value=False)
         self.width_var = tk.StringVar(value="")
@@ -95,8 +96,8 @@ class App:
         self.crop_var = tk.BooleanVar(value=False)
         self.crop_left_var = tk.IntVar(value=0)
         self.crop_top_var = tk.IntVar(value=0)
-        self.crop_right_var = tk.IntVar(value=100)
-        self.crop_bottom_var = tk.IntVar(value=100)
+        self.crop_right_var = tk.IntVar(value=0)
+        self.crop_bottom_var = tk.IntVar(value=0)
 
         # Color options
         self.invert_colors_var = tk.BooleanVar(value=True)
@@ -388,11 +389,14 @@ class App:
         # Width and height inputs
         size_frame = ttk.Frame(resize_frame)
         size_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        # Source - https://stackoverflow.com/a/4140988
+        val_cmd = (size_frame.register(str.isdigit), '%S')
 
         ttk.Label(size_frame, text="Width:").grid(
             row=0, column=0, padx=5, pady=2, sticky="w"
         )
-        ttk.Entry(size_frame, textvariable=self.width_var, width=8).grid(
+        ttk.Entry(size_frame, textvariable=self.width_var, width=8, validate="key", validatecommand=val_cmd).grid(
             row=0, column=1, padx=5, pady=2
         )
         ttk.Label(size_frame, text="pixels").grid(
@@ -402,7 +406,7 @@ class App:
         ttk.Label(size_frame, text="Height:").grid(
             row=1, column=0, padx=5, pady=2, sticky="w"
         )
-        ttk.Entry(size_frame, textvariable=self.height_var, width=8).grid(
+        ttk.Entry(size_frame, textvariable=self.height_var, width=8, validate="key", validatecommand=val_cmd).grid(
             row=1, column=1, padx=5, pady=2
         )
         ttk.Label(size_frame, text="pixels").grid(
@@ -445,64 +449,88 @@ class App:
         )
 
         def update_crop_left_scale(value: str):
-            self.crop_left_var.set(int(float(value)))
+            current_width: float = 0.0 if not self.width_var.get().isdigit() else float(self.width_var.get())
+            self.crop_left_var.set(int(float(value) * current_width))
             self.update_preview()
-        
+
         ttk.Scale(
             crop_controls,
-            from_=0,
-            to=100,
+            from_=0.0,
+            to=0.5,
+            value=0.0,
             orient=tk.HORIZONTAL,
             command=update_crop_left_scale,
         ).grid(row=0, column=1, padx=5, pady=2, sticky="ew")
+
+        ttk.Label(crop_controls, textvariable=self.crop_left_var).grid(
+            row=0, column=2, padx=5, pady=2, sticky="w"
+        )
 
         ttk.Label(crop_controls, text="Top:").grid(
             row=1, column=0, padx=5, pady=2, sticky="w"
         )
 
         def update_crop_top_scale(value: str):
-            self.crop_top_var.set(int(float(value)))
+            current_height: float = 0.0 if not self.height_var.get().isdigit() else float(self.height_var.get())
+            self.crop_top_var.set(int(float(value) * current_height))
             self.update_preview()
 
         ttk.Scale(
             crop_controls,
-            from_=0,
-            to=100,
+            from_=0.0,
+            to=0.5,
+            value=0.0,
             orient=tk.HORIZONTAL,
             command=update_crop_top_scale,
         ).grid(row=1, column=1, padx=5, pady=2, sticky="ew")
+
+        ttk.Label(crop_controls, textvariable=self.crop_top_var).grid(
+            row=1, column=2, padx=5, pady=2, sticky="w"
+        )
 
         ttk.Label(crop_controls, text="Right:").grid(
             row=2, column=0, padx=5, pady=2, sticky="w"
         )
 
         def update_crop_right_scale(value: str):
-            self.crop_right_var.set(int(float(value)))
+            current_width: float = 0.0 if not self.width_var.get().isdigit() else float(self.width_var.get())
+            self.crop_right_var.set(int(float(value) * current_width))
             self.update_preview()
 
         ttk.Scale(
             crop_controls,
-            from_=0,
-            to=100,
+            from_=0.5,
+            to=1.0,
+            value=1.0,
             orient=tk.HORIZONTAL,
             command=update_crop_right_scale,
         ).grid(row=2, column=1, padx=5, pady=2, sticky="ew")
+
+        ttk.Label(crop_controls, textvariable=self.crop_right_var).grid(
+            row=2, column=2, padx=5, pady=2, sticky="w"
+        )
 
         ttk.Label(crop_controls, text="Bottom:").grid(
             row=3, column=0, padx=5, pady=2, sticky="w"
         )
 
         def update_crop_bottom_scale(value: str):
-            self.crop_bottom_var.set(int(float(value)))
+            current_height: float = 0.0 if not self.height_var.get().isdigit() else float(self.height_var.get())
+            self.crop_bottom_var.set(int(float(value) * current_height))
             self.update_preview()
         
         ttk.Scale(
             crop_controls,
-            from_=0,
-            to=100,
+            from_=0.5,
+            to=1.0,
+            value=1.0,
             orient=tk.HORIZONTAL,
             command=update_crop_bottom_scale,
         ).grid(row=3, column=1, padx=5, pady=2, sticky="ew")
+
+        ttk.Label(crop_controls, textvariable=self.crop_bottom_var).grid(
+            row=3, column=2, padx=5, pady=2, sticky="w"
+        )
 
         crop_controls.columnconfigure(1, weight=1)
 
@@ -916,6 +944,16 @@ class App:
 
             # Update status
             self.status_label.config(text=f"Loaded: {os.path.basename(file_path)}")
+
+            # Update width and size vars
+            self.width_var.set(str(self.original_image.width))
+            self.height_var.set(str(self.original_image.height))
+
+            # Update cropping dimensions to edge values
+            self.crop_left_var.set(0)
+            self.crop_top_var.set(0)
+            self.crop_right_var.set(self.original_image.width)
+            self.crop_bottom_var.set(self.original_image.height)
 
             # Update preview
             self.update_preview()
