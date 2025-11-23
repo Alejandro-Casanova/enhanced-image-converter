@@ -3,7 +3,7 @@ import logging
 import os
 import tkinter as tk
 from tkinter import ttk, filedialog
-from tkinter import messagebox 
+from tkinter import messagebox
 import threading
 from tkinter import colorchooser
 from tkinter import simpledialog
@@ -23,8 +23,9 @@ CREATOR_STRING = "Created by Vinay Ahari"
 
 APP_ICON_PATH_ICO = "assets/sample_icon.ico"
 APP_ICON_PATH_PNG = "assets/sample_icon.png"
-APP_ICON_PATH = APP_ICON_PATH_ICO if os.name == 'nt' else APP_ICON_PATH_PNG
+APP_ICON_PATH = APP_ICON_PATH_ICO if os.name == "nt" else APP_ICON_PATH_PNG
 APP_LOGO_PATH_PNG = "assets/sample_logo.png"
+
 
 class App:
     def __init__(self, root: tk.Tk):
@@ -32,7 +33,7 @@ class App:
         self.root.title("Background Remover and Color Inverter")
         self.root.geometry("900x700")
         self.root.minsize(800, 600)
-    
+
         self._settings = SettingsManager()
         self._logger: logging.Logger = logging.getLogger(__name__)
 
@@ -40,7 +41,7 @@ class App:
         try:
             if not os.path.isfile(APP_ICON_PATH):
                 self._logger.warning(f"Icon file not found: {APP_ICON_PATH}")
-            elif os.name == 'nt':  # Windows
+            elif os.name == "nt":  # Windows
                 self.root.iconbitmap(APP_ICON_PATH)
             else:  # Linux/Mac
                 icon = tk.PhotoImage(file=APP_ICON_PATH)
@@ -110,14 +111,22 @@ class App:
         self.replacement_color_rgb = (255, 255, 255)
 
         # Output options
-        self.output_format_var = tk.StringVar(value=self._settings.get("default_format"))
+        self.output_format_var = tk.StringVar(
+            value=self._settings.get("default_format")
+        )
         self.output_quality_var = tk.IntVar(value=95)
         self.output_optimize_var = tk.BooleanVar(value=True)
-        self.preserve_metadata_var = tk.BooleanVar(value=self._settings.get("preserve_metadata"))
-        self.overwrite_var = tk.BooleanVar(value=self._settings.get("overwrite_existing"))
+        self.preserve_metadata_var = tk.BooleanVar(
+            value=self._settings.get("preserve_metadata")
+        )
+        self.overwrite_var = tk.BooleanVar(
+            value=self._settings.get("overwrite_existing")
+        )
         self.custom_output_var = tk.BooleanVar(value=False)
         self.output_dir_var = tk.StringVar(value=self._settings.get("last_output_dir"))
-        self.naming_pattern_var = tk.StringVar(value=self._settings.get("custom_naming"))
+        self.naming_pattern_var = tk.StringVar(
+            value=self._settings.get("custom_naming")
+        )
 
         # Preview
         self.preview_var = tk.BooleanVar(value=True)
@@ -136,19 +145,33 @@ class App:
 
         # File menu
         self.file_menu = tk.Menu(self.menu_bar, tearoff=0)
-        self.file_menu.add_command(label="Open File...", command=self.open_file, accelerator="Ctrl+O")
-        self.file_menu.add_command(label="Open Folder...", command=self.open_folder, accelerator="Ctrl+Shift+O")
-        self.file_menu.add_command(label="Open Multiple Files...", command=self.open_multiple_files)
+        self.file_menu.add_command(
+            label="Open File...", command=self.open_file, accelerator="Ctrl+O"
+        )
+        self.file_menu.add_command(
+            label="Open Folder...", command=self.open_folder, accelerator="Ctrl+Shift+O"
+        )
+        self.file_menu.add_command(
+            label="Open Multiple Files...", command=self.open_multiple_files
+        )
 
         # Recent files submenu
         self.recent_menu = tk.Menu(self.file_menu, tearoff=0)
         self.file_menu.add_cascade(label="Recent Files", menu=self.recent_menu)
 
         self.file_menu.add_separator()
-        self.file_menu.add_command(label="Save Current Image...", command=self.save_current_image, accelerator="Ctrl+S")
-        self.file_menu.add_command(label="Save All", command=self.process_queue, accelerator="Ctrl+Shift+S")
+        self.file_menu.add_command(
+            label="Save Current Image...",
+            command=self.save_current_image,
+            accelerator="Ctrl+S",
+        )
+        self.file_menu.add_command(
+            label="Save All", command=self.process_queue, accelerator="Ctrl+Shift+S"
+        )
         self.file_menu.add_separator()
-        self.file_menu.add_command(label="Exit", command=self.root.quit, accelerator="Alt+F4")
+        self.file_menu.add_command(
+            label="Exit", command=self.root.quit, accelerator="Alt+F4"
+        )
 
         self.menu_bar.add_cascade(label="File", menu=self.file_menu)
 
@@ -159,30 +182,47 @@ class App:
 
         # Presets submenu
         self.presets_menu = tk.Menu(self.edit_menu, tearoff=0)
-        self.presets_menu.add_command(label="Save Current Settings as Preset...", command=self.save_preset)
-        self.presets_menu.add_command(label="Manage Presets...", command=self.manage_presets)
+        self.presets_menu.add_command(
+            label="Save Current Settings as Preset...", command=self.save_preset
+        )
+        self.presets_menu.add_command(
+            label="Manage Presets...", command=self.manage_presets
+        )
         self.presets_menu.add_separator()
 
         # Add default presets
-        self.presets_menu.add_command(label="Logo on Black", command=lambda: self.load_preset("logo_black"))
-        self.presets_menu.add_command(label="Logo on White", command=lambda: self.load_preset("logo_white"))
-        self.presets_menu.add_command(label="Product Image", command=lambda: self.load_preset("product"))
+        self.presets_menu.add_command(
+            label="Logo on Black", command=lambda: self.load_preset("logo_black")
+        )
+        self.presets_menu.add_command(
+            label="Logo on White", command=lambda: self.load_preset("logo_white")
+        )
+        self.presets_menu.add_command(
+            label="Product Image", command=lambda: self.load_preset("product")
+        )
 
         self.edit_menu.add_cascade(label="Presets", menu=self.presets_menu)
         self.edit_menu.add_separator()
-        self.edit_menu.add_command(label="Preferences...", command=self.show_preferences)
+        self.edit_menu.add_command(
+            label="Preferences...", command=self.show_preferences
+        )
 
         self.menu_bar.add_cascade(label="Edit", menu=self.edit_menu)
 
         # View menu
         self.view_menu = tk.Menu(self.menu_bar, tearoff=0)
-        self.view_menu.add_checkbutton(label="Show Preview", variable=self.preview_var,
-                                       command=self.toggle_preview)
+        self.view_menu.add_checkbutton(
+            label="Show Preview", variable=self.preview_var, command=self.toggle_preview
+        )
 
         # Theme submenu
         self.theme_menu = tk.Menu(self.view_menu, tearoff=0)
-        self.theme_menu.add_command(label="Light", command=lambda: self.apply_theme("light"))
-        self.theme_menu.add_command(label="Dark", command=lambda: self.apply_theme("dark"))
+        self.theme_menu.add_command(
+            label="Light", command=lambda: self.apply_theme("light")
+        )
+        self.theme_menu.add_command(
+            label="Dark", command=lambda: self.apply_theme("dark")
+        )
 
         self.view_menu.add_cascade(label="Theme", menu=self.theme_menu)
 
@@ -190,7 +230,9 @@ class App:
 
         # Help menu
         self.help_menu = tk.Menu(self.menu_bar, tearoff=0)
-        self.help_menu.add_command(label="Documentation", command=self.show_documentation)
+        self.help_menu.add_command(
+            label="Documentation", command=self.show_documentation
+        )
         self.help_menu.add_command(label="About", command=self.show_about)
 
         self.menu_bar.add_cascade(label="Help", menu=self.help_menu)
@@ -267,12 +309,27 @@ class App:
         bg_frame.pack(fill=tk.X, padx=10, pady=5)
 
         # Background mode radio buttons
-        ttk.Radiobutton(bg_frame, text="Black Background", variable=self.bg_mode_var,
-                        value="black", command=self.update_preview).pack(anchor="w", padx=10, pady=2)
-        ttk.Radiobutton(bg_frame, text="White Background", variable=self.bg_mode_var,
-                        value="white", command=self.update_preview).pack(anchor="w", padx=10, pady=2)
-        ttk.Radiobutton(bg_frame, text="Custom Color", variable=self.bg_mode_var,
-                        value="custom", command=self.update_preview).pack(anchor="w", padx=10, pady=2)
+        ttk.Radiobutton(
+            bg_frame,
+            text="Black Background",
+            variable=self.bg_mode_var,
+            value="black",
+            command=self.update_preview,
+        ).pack(anchor="w", padx=10, pady=2)
+        ttk.Radiobutton(
+            bg_frame,
+            text="White Background",
+            variable=self.bg_mode_var,
+            value="white",
+            command=self.update_preview,
+        ).pack(anchor="w", padx=10, pady=2)
+        ttk.Radiobutton(
+            bg_frame,
+            text="Custom Color",
+            variable=self.bg_mode_var,
+            value="custom",
+            command=self.update_preview,
+        ).pack(anchor="w", padx=10, pady=2)
 
         # Custom color picker
         color_frame = ttk.Frame(bg_frame)
@@ -281,51 +338,86 @@ class App:
         ttk.Label(color_frame, text="Custom Color:").pack(side=tk.LEFT, padx=5)
         self.color_preview = ttk.Label(color_frame, text="      ", background="#000000")
         self.color_preview.pack(side=tk.LEFT, padx=5)
-        ttk.Button(color_frame, text="Pick Color", command=self.pick_color).pack(side=tk.LEFT, padx=5)
+        ttk.Button(color_frame, text="Pick Color", command=self.pick_color).pack(
+            side=tk.LEFT, padx=5
+        )
 
         # Tolerance slider
         tolerance_frame = ttk.Frame(bg_frame)
         tolerance_frame.pack(fill=tk.X, padx=10, pady=5)
 
         ttk.Label(tolerance_frame, text="Tolerance:").pack(side=tk.LEFT, padx=5)
-        ttk.Scale(tolerance_frame, from_=0, to=100, orient=tk.HORIZONTAL,
-                  variable=self.tolerance_var, command=lambda _: self.update_preview()).pack(side=tk.LEFT, fill=tk.X,
-                                                                                             expand=True, padx=5)
-        ttk.Label(tolerance_frame, textvariable=self.tolerance_var).pack(side=tk.LEFT, padx=5)
+        ttk.Scale(
+            tolerance_frame,
+            from_=0,
+            to=100,
+            orient=tk.HORIZONTAL,
+            variable=self.tolerance_var,
+            command=lambda _: self.update_preview(),
+        ).pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        ttk.Label(tolerance_frame, textvariable=self.tolerance_var).pack(
+            side=tk.LEFT, padx=5
+        )
 
         # Color options frame
         color_options_frame = ttk.LabelFrame(self.basic_frame, text="Color Options")
         color_options_frame.pack(fill=tk.X, padx=10, pady=5)
 
-        ttk.Checkbutton(color_options_frame, text="Invert Colors", variable=self.invert_colors_var,
-                        command=self.update_preview).pack(anchor="w", padx=10, pady=5)
+        ttk.Checkbutton(
+            color_options_frame,
+            text="Invert Colors",
+            variable=self.invert_colors_var,
+            command=self.update_preview,
+        ).pack(anchor="w", padx=10, pady=5)
 
         # Resize frame
         resize_frame = ttk.LabelFrame(self.basic_frame, text="Resize")
         resize_frame.pack(fill=tk.X, padx=10, pady=5)
 
-        ttk.Checkbutton(resize_frame, text="Resize Image", variable=self.resize_var,
-                        command=self.toggle_resize).pack(anchor="w", padx=10, pady=2)
+        ttk.Checkbutton(
+            resize_frame,
+            text="Resize Image",
+            variable=self.resize_var,
+            command=self.toggle_resize,
+        ).pack(anchor="w", padx=10, pady=2)
 
         # Width and height inputs
         size_frame = ttk.Frame(resize_frame)
         size_frame.pack(fill=tk.X, padx=10, pady=5)
 
-        ttk.Label(size_frame, text="Width:").grid(row=0, column=0, padx=5, pady=2, sticky="w")
-        ttk.Entry(size_frame, textvariable=self.width_var, width=8).grid(row=0, column=1, padx=5, pady=2)
-        ttk.Label(size_frame, text="pixels").grid(row=0, column=2, padx=5, pady=2, sticky="w")
+        ttk.Label(size_frame, text="Width:").grid(
+            row=0, column=0, padx=5, pady=2, sticky="w"
+        )
+        ttk.Entry(size_frame, textvariable=self.width_var, width=8).grid(
+            row=0, column=1, padx=5, pady=2
+        )
+        ttk.Label(size_frame, text="pixels").grid(
+            row=0, column=2, padx=5, pady=2, sticky="w"
+        )
 
-        ttk.Label(size_frame, text="Height:").grid(row=1, column=0, padx=5, pady=2, sticky="w")
-        ttk.Entry(size_frame, textvariable=self.height_var, width=8).grid(row=1, column=1, padx=5, pady=2)
-        ttk.Label(size_frame, text="pixels").grid(row=1, column=2, padx=5, pady=2, sticky="w")
+        ttk.Label(size_frame, text="Height:").grid(
+            row=1, column=0, padx=5, pady=2, sticky="w"
+        )
+        ttk.Entry(size_frame, textvariable=self.height_var, width=8).grid(
+            row=1, column=1, padx=5, pady=2
+        )
+        ttk.Label(size_frame, text="pixels").grid(
+            row=1, column=2, padx=5, pady=2, sticky="w"
+        )
 
         # Action buttons
         action_frame = ttk.Frame(self.basic_frame)
         action_frame.pack(fill=tk.X, padx=10, pady=10)
 
-        ttk.Button(action_frame, text="Open File", command=self.open_file).pack(side=tk.LEFT, padx=5)
-        ttk.Button(action_frame, text="Open Folder", command=self.open_folder).pack(side=tk.LEFT, padx=5)
-        ttk.Button(action_frame, text="Process & Save", command=self.process_current).pack(side=tk.LEFT, padx=5)
+        ttk.Button(action_frame, text="Open File", command=self.open_file).pack(
+            side=tk.LEFT, padx=5
+        )
+        ttk.Button(action_frame, text="Open Folder", command=self.open_folder).pack(
+            side=tk.LEFT, padx=5
+        )
+        ttk.Button(
+            action_frame, text="Process & Save", command=self.process_current
+        ).pack(side=tk.LEFT, padx=5)
 
     def create_advanced_settings(self):
         """Create advanced settings UI"""
@@ -333,32 +425,64 @@ class App:
         crop_frame = ttk.LabelFrame(self.advanced_frame, text="Crop")
         crop_frame.pack(fill=tk.X, padx=10, pady=5)
 
-        ttk.Checkbutton(crop_frame, text="Crop Image", variable=self.crop_var,
-                        command=self.toggle_crop).pack(anchor="w", padx=10, pady=2)
+        ttk.Checkbutton(
+            crop_frame,
+            text="Crop Image",
+            variable=self.crop_var,
+            command=self.toggle_crop,
+        ).pack(anchor="w", padx=10, pady=2)
 
         # Crop controls
         crop_controls = ttk.Frame(crop_frame)
         crop_controls.pack(fill=tk.X, padx=10, pady=5)
 
-        ttk.Label(crop_controls, text="Left:").grid(row=0, column=0, padx=5, pady=2, sticky="w")
-        ttk.Scale(crop_controls, from_=0, to=100, orient=tk.HORIZONTAL,
-                  variable=self.crop_left_var, command=lambda _: self.update_preview()).grid(row=0, column=1, padx=5,
-                                                                                             pady=2, sticky="ew")
+        ttk.Label(crop_controls, text="Left:").grid(
+            row=0, column=0, padx=5, pady=2, sticky="w"
+        )
+        ttk.Scale(
+            crop_controls,
+            from_=0,
+            to=100,
+            orient=tk.HORIZONTAL,
+            variable=self.crop_left_var,
+            command=lambda _: self.update_preview(),
+        ).grid(row=0, column=1, padx=5, pady=2, sticky="ew")
 
-        ttk.Label(crop_controls, text="Top:").grid(row=1, column=0, padx=5, pady=2, sticky="w")
-        ttk.Scale(crop_controls, from_=0, to=100, orient=tk.HORIZONTAL,
-                  variable=self.crop_top_var, command=lambda _: self.update_preview()).grid(row=1, column=1, padx=5,
-                                                                                            pady=2, sticky="ew")
+        ttk.Label(crop_controls, text="Top:").grid(
+            row=1, column=0, padx=5, pady=2, sticky="w"
+        )
+        ttk.Scale(
+            crop_controls,
+            from_=0,
+            to=100,
+            orient=tk.HORIZONTAL,
+            variable=self.crop_top_var,
+            command=lambda _: self.update_preview(),
+        ).grid(row=1, column=1, padx=5, pady=2, sticky="ew")
 
-        ttk.Label(crop_controls, text="Right:").grid(row=2, column=0, padx=5, pady=2, sticky="w")
-        ttk.Scale(crop_controls, from_=0, to=100, orient=tk.HORIZONTAL,
-                  variable=self.crop_right_var, command=lambda _: self.update_preview()).grid(row=2, column=1, padx=5,
-                                                                                              pady=2, sticky="ew")
+        ttk.Label(crop_controls, text="Right:").grid(
+            row=2, column=0, padx=5, pady=2, sticky="w"
+        )
+        ttk.Scale(
+            crop_controls,
+            from_=0,
+            to=100,
+            orient=tk.HORIZONTAL,
+            variable=self.crop_right_var,
+            command=lambda _: self.update_preview(),
+        ).grid(row=2, column=1, padx=5, pady=2, sticky="ew")
 
-        ttk.Label(crop_controls, text="Bottom:").grid(row=3, column=0, padx=5, pady=2, sticky="w")
-        ttk.Scale(crop_controls, from_=0, to=100, orient=tk.HORIZONTAL,
-                  variable=self.crop_bottom_var, command=lambda _: self.update_preview()).grid(row=3, column=1, padx=5,
-                                                                                               pady=2, sticky="ew")
+        ttk.Label(crop_controls, text="Bottom:").grid(
+            row=3, column=0, padx=5, pady=2, sticky="w"
+        )
+        ttk.Scale(
+            crop_controls,
+            from_=0,
+            to=100,
+            orient=tk.HORIZONTAL,
+            variable=self.crop_bottom_var,
+            command=lambda _: self.update_preview(),
+        ).grid(row=3, column=1, padx=5, pady=2, sticky="ew")
 
         crop_controls.columnconfigure(1, weight=1)
 
@@ -366,34 +490,55 @@ class App:
         alpha_frame = ttk.LabelFrame(self.advanced_frame, text="Transparency")
         alpha_frame.pack(fill=tk.X, padx=10, pady=5)
 
-        ttk.Checkbutton(alpha_frame, text="Adjust Transparency", variable=self.adjust_alpha_var,
-                        command=self.toggle_alpha).pack(anchor="w", padx=10, pady=2)
+        ttk.Checkbutton(
+            alpha_frame,
+            text="Adjust Transparency",
+            variable=self.adjust_alpha_var,
+            command=self.toggle_alpha,
+        ).pack(anchor="w", padx=10, pady=2)
 
         # Alpha slider
         alpha_slider_frame = ttk.Frame(alpha_frame)
         alpha_slider_frame.pack(fill=tk.X, padx=10, pady=5)
 
         ttk.Label(alpha_slider_frame, text="Alpha:").pack(side=tk.LEFT, padx=5)
-        ttk.Scale(alpha_slider_frame, from_=0, to=255, orient=tk.HORIZONTAL,
-                  variable=self.alpha_value_var, command=lambda _: self.update_preview()).pack(side=tk.LEFT, fill=tk.X,
-                                                                                               expand=True, padx=5)
-        ttk.Label(alpha_slider_frame, textvariable=self.alpha_value_var).pack(side=tk.LEFT, padx=5)
+        ttk.Scale(
+            alpha_slider_frame,
+            from_=0,
+            to=255,
+            orient=tk.HORIZONTAL,
+            variable=self.alpha_value_var,
+            command=lambda _: self.update_preview(),
+        ).pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        ttk.Label(alpha_slider_frame, textvariable=self.alpha_value_var).pack(
+            side=tk.LEFT, padx=5
+        )
 
         # Background replacement frame
-        bg_replace_frame = ttk.LabelFrame(self.advanced_frame, text="Background Replacement")
+        bg_replace_frame = ttk.LabelFrame(
+            self.advanced_frame, text="Background Replacement"
+        )
         bg_replace_frame.pack(fill=tk.X, padx=10, pady=5)
 
-        ttk.Checkbutton(bg_replace_frame, text="Replace Background", variable=self.replace_bg_var,
-                        command=self.toggle_bg_replacement).pack(anchor="w", padx=10, pady=2)
+        ttk.Checkbutton(
+            bg_replace_frame,
+            text="Replace Background",
+            variable=self.replace_bg_var,
+            command=self.toggle_bg_replacement,
+        ).pack(anchor="w", padx=10, pady=2)
 
         # Background color picker
         bg_color_frame = ttk.Frame(bg_replace_frame)
         bg_color_frame.pack(fill=tk.X, padx=10, pady=5)
 
         ttk.Label(bg_color_frame, text="Background Color:").pack(side=tk.LEFT, padx=5)
-        self.bg_color_preview = ttk.Label(bg_color_frame, text="      ", background="#FFFFFF")
+        self.bg_color_preview = ttk.Label(
+            bg_color_frame, text="      ", background="#FFFFFF"
+        )
         self.bg_color_preview.pack(side=tk.LEFT, padx=5)
-        ttk.Button(bg_color_frame, text="Pick Color", command=self.pick_bg_color).pack(side=tk.LEFT, padx=5)
+        ttk.Button(bg_color_frame, text="Pick Color", command=self.pick_bg_color).pack(
+            side=tk.LEFT, padx=5
+        )
 
     def create_output_settings(self):
         """Create output settings UI"""
@@ -401,36 +546,55 @@ class App:
         format_frame = ttk.LabelFrame(self.output_frame, text="Output Format")
         format_frame.pack(fill=tk.X, padx=10, pady=5)
 
-        formats = [("PNG (with transparency)", "png"),
-                   ("JPEG (no transparency)", "jpg"),
-                   ("WebP (with transparency)", "webp"),
-                   ("TIFF (with transparency)", "tiff"),
-                   ("BMP (no transparency)", "bmp")]
+        formats = [
+            ("PNG (with transparency)", "png"),
+            ("JPEG (no transparency)", "jpg"),
+            ("WebP (with transparency)", "webp"),
+            ("TIFF (with transparency)", "tiff"),
+            ("BMP (no transparency)", "bmp"),
+        ]
 
         for text, value in formats:
-            ttk.Radiobutton(format_frame, text=text, variable=self.output_format_var,
-                            value=value).pack(anchor="w", padx=10, pady=2)
+            ttk.Radiobutton(
+                format_frame, text=text, variable=self.output_format_var, value=value
+            ).pack(anchor="w", padx=10, pady=2)
 
         # Quality settings (for JPEG/WebP)
         quality_frame = ttk.Frame(format_frame)
         quality_frame.pack(fill=tk.X, padx=10, pady=5)
 
         ttk.Label(quality_frame, text="Quality:").pack(side=tk.LEFT, padx=5)
-        ttk.Scale(quality_frame, from_=1, to=100, orient=tk.HORIZONTAL,
-                  variable=self.output_quality_var).pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
-        ttk.Label(quality_frame, textvariable=self.output_quality_var).pack(side=tk.LEFT, padx=5)
+        ttk.Scale(
+            quality_frame,
+            from_=1,
+            to=100,
+            orient=tk.HORIZONTAL,
+            variable=self.output_quality_var,
+        ).pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        ttk.Label(quality_frame, textvariable=self.output_quality_var).pack(
+            side=tk.LEFT, padx=5
+        )
 
-        ttk.Checkbutton(format_frame, text="Optimize File Size",
-                        variable=self.output_optimize_var).pack(anchor="w", padx=10, pady=2)
+        ttk.Checkbutton(
+            format_frame, text="Optimize File Size", variable=self.output_optimize_var
+        ).pack(anchor="w", padx=10, pady=2)
 
         # Output location frame
         location_frame = ttk.LabelFrame(self.output_frame, text="Output Location")
         location_frame.pack(fill=tk.X, padx=10, pady=5)
 
-        ttk.Radiobutton(location_frame, text="Save to 'converted' subfolder",
-                        variable=self.custom_output_var, value=False).pack(anchor="w", padx=10, pady=2)
-        ttk.Radiobutton(location_frame, text="Save to custom location",
-                        variable=self.custom_output_var, value=True).pack(anchor="w", padx=10, pady=2)
+        ttk.Radiobutton(
+            location_frame,
+            text="Save to 'converted' subfolder",
+            variable=self.custom_output_var,
+            value=False,
+        ).pack(anchor="w", padx=10, pady=2)
+        ttk.Radiobutton(
+            location_frame,
+            text="Save to custom location",
+            variable=self.custom_output_var,
+            value=True,
+        ).pack(anchor="w", padx=10, pady=2)
 
         # Custom output directory
         dir_frame = ttk.Frame(location_frame)
@@ -438,26 +602,34 @@ class App:
 
         self.output_dir_entry = ttk.Entry(dir_frame, textvariable=self.output_dir_var)
         self.output_dir_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
-        ttk.Button(dir_frame, text="Browse...", command=self.browse_output_dir).pack(side=tk.LEFT, padx=5)
+        ttk.Button(dir_frame, text="Browse...", command=self.browse_output_dir).pack(
+            side=tk.LEFT, padx=5
+        )
 
         # File naming frame
         naming_frame = ttk.LabelFrame(self.output_frame, text="File Naming")
         naming_frame.pack(fill=tk.X, padx=10, pady=5)
 
         ttk.Label(naming_frame, text="Pattern:").pack(anchor="w", padx=10, pady=2)
-        ttk.Entry(naming_frame, textvariable=self.naming_pattern_var).pack(fill=tk.X, padx=10, pady=2)
+        ttk.Entry(naming_frame, textvariable=self.naming_pattern_var).pack(
+            fill=tk.X, padx=10, pady=2
+        )
 
-        ttk.Label(naming_frame, text="Available variables: {filename}, {date}, {time}, {counter}").pack(anchor="w",
-                                                                                                        padx=10, pady=2)
+        ttk.Label(
+            naming_frame,
+            text="Available variables: {filename}, {date}, {time}, {counter}",
+        ).pack(anchor="w", padx=10, pady=2)
 
         # File handling options
         options_frame = ttk.Frame(self.output_frame)
         options_frame.pack(fill=tk.X, padx=10, pady=5)
 
-        ttk.Checkbutton(options_frame, text="Preserve metadata",
-                        variable=self.preserve_metadata_var).pack(anchor="w", padx=10, pady=2)
-        ttk.Checkbutton(options_frame, text="Overwrite existing files",
-                        variable=self.overwrite_var).pack(anchor="w", padx=10, pady=2)
+        ttk.Checkbutton(
+            options_frame, text="Preserve metadata", variable=self.preserve_metadata_var
+        ).pack(anchor="w", padx=10, pady=2)
+        ttk.Checkbutton(
+            options_frame, text="Overwrite existing files", variable=self.overwrite_var
+        ).pack(anchor="w", padx=10, pady=2)
 
     def create_batch_settings(self):
         """Create batch processing UI"""
@@ -466,7 +638,9 @@ class App:
         queue_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
 
         # Queue list
-        self.queue_list = ttk.Treeview(queue_frame, columns=("path", "status"), show="headings")
+        self.queue_list = ttk.Treeview(
+            queue_frame, columns=("path", "status"), show="headings"
+        )
         self.queue_list.heading("path", text="File Path")
         self.queue_list.heading("status", text="Status")
         self.queue_list.column("path", width=300)
@@ -474,7 +648,9 @@ class App:
         self.queue_list.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
         # Scrollbar for queue list
-        scrollbar = ttk.Scrollbar(queue_frame, orient="vertical", command=self.queue_list.yview)
+        scrollbar = ttk.Scrollbar(
+            queue_frame, orient="vertical", command=self.queue_list.yview
+        )
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.queue_list.configure(yscrollcommand=scrollbar.set)
 
@@ -482,10 +658,18 @@ class App:
         controls_frame = ttk.Frame(self.batch_frame)
         controls_frame.pack(fill=tk.X, padx=10, pady=5)
 
-        ttk.Button(controls_frame, text="Add Files", command=self.open_multiple_files).pack(side=tk.LEFT, padx=5)
-        ttk.Button(controls_frame, text="Remove Selected", command=self.remove_selected).pack(side=tk.LEFT, padx=5)
-        ttk.Button(controls_frame, text="Clear Queue", command=self.clear_queue).pack(side=tk.LEFT, padx=5)
-        ttk.Button(controls_frame, text="Process All", command=self.process_queue).pack(side=tk.LEFT, padx=5)
+        ttk.Button(
+            controls_frame, text="Add Files", command=self.open_multiple_files
+        ).pack(side=tk.LEFT, padx=5)
+        ttk.Button(
+            controls_frame, text="Remove Selected", command=self.remove_selected
+        ).pack(side=tk.LEFT, padx=5)
+        ttk.Button(controls_frame, text="Clear Queue", command=self.clear_queue).pack(
+            side=tk.LEFT, padx=5
+        )
+        ttk.Button(controls_frame, text="Process All", command=self.process_queue).pack(
+            side=tk.LEFT, padx=5
+        )
 
     def create_preview_ui(self):
         """Create the preview panel UI"""
@@ -511,8 +695,12 @@ class App:
         controls_frame = ttk.Frame(self.preview_frame)
         controls_frame.pack(fill=tk.X, padx=10, pady=5)
 
-        ttk.Button(controls_frame, text="Update Preview", command=self.update_preview).pack(side=tk.LEFT, padx=5)
-        ttk.Checkbutton(controls_frame, text="Auto Preview", variable=self.preview_var).pack(side=tk.LEFT, padx=5)
+        ttk.Button(
+            controls_frame, text="Update Preview", command=self.update_preview
+        ).pack(side=tk.LEFT, padx=5)
+        ttk.Checkbutton(
+            controls_frame, text="Auto Preview", variable=self.preview_var
+        ).pack(side=tk.LEFT, padx=5)
 
     def create_status_bar(self):
         """Create the status bar"""
@@ -522,7 +710,9 @@ class App:
         self.status_label = ttk.Label(self.status_bar, text="Ready")
         self.status_label.pack(side=tk.LEFT, padx=5, pady=2)
 
-        self.progress_bar = ttk.Progressbar(self.status_bar, orient="horizontal", length=200, mode="determinate")
+        self.progress_bar = ttk.Progressbar(
+            self.status_bar, orient="horizontal", length=200, mode="determinate"
+        )
         self.progress_bar.pack(side=tk.RIGHT, padx=5, pady=2)
 
     def add_creator_info(self):
@@ -534,12 +724,14 @@ class App:
         """Set up drag and drop functionality"""
         try:
             # This will only work on Windows with additional libraries
-            if os.name == 'nt':
+            if os.name == "nt":
                 self.root.drop_target_register("DND_Files")
-                self.root.dnd_bind('<<Drop>>', self.handle_drop)
+                self.root.dnd_bind("<<Drop>>", self.handle_drop)
         except AttributeError:
             # If the dnd methods are not available, just pass
-            self._logger.warning("Drag and drop not supported. Additional libraries may be required.")
+            self._logger.warning(
+                "Drag and drop not supported. Additional libraries may be required."
+            )
         except Exception as e:
             # If drag and drop is not available, just pass
             self._logger.error(f"Drag and drop setup failed: {e}", exc_info=True)
@@ -549,7 +741,9 @@ class App:
         """Handle drag and drop events"""
         files = self.root.tk.splitlist(event.data)
         for file in files:
-            if os.path.isfile(file) and file.lower().endswith((".png", ".jpg", ".jpeg", ".webp", ".tiff", ".bmp")):
+            if os.path.isfile(file) and file.lower().endswith(
+                (".png", ".jpg", ".jpeg", ".webp", ".tiff", ".bmp")
+            ):
                 self.add_to_queue(file)
             elif os.path.isdir(file):
                 self.process_folder_path(file)
@@ -563,11 +757,15 @@ class App:
         recent_files = self._settings.get("recent_files")
         if recent_files:
             for file in recent_files:
-                self.recent_menu.add_command(label=os.path.basename(file),
-                                             command=lambda f=file: self.open_recent_file(f))
+                self.recent_menu.add_command(
+                    label=os.path.basename(file),
+                    command=lambda f=file: self.open_recent_file(f),
+                )
 
             self.recent_menu.add_separator()
-            self.recent_menu.add_command(label="Clear Recent Files", command=self.clear_recent_files)
+            self.recent_menu.add_command(
+                label="Clear Recent Files", command=self.clear_recent_files
+            )
         else:
             self.recent_menu.add_command(label="No Recent Files", state=tk.DISABLED)
 
@@ -647,7 +845,9 @@ class App:
         if os.path.exists(file_path):
             self.load_image(file_path)
         else:
-            messagebox.showerror("File Not Found", f"The file {file_path} no longer exists.")
+            messagebox.showerror(
+                "File Not Found", f"The file {file_path} no longer exists."
+            )
             # Remove from recent files
             recent_files = self._settings.get("recent_files")
             if file_path in recent_files:
@@ -698,7 +898,9 @@ class App:
         """Process all images in a folder"""
         count = 0
         for filename in os.listdir(folder_path):
-            if filename.lower().endswith((".png", ".jpg", ".jpeg", ".webp", ".tiff", ".bmp")):
+            if filename.lower().endswith(
+                (".png", ".jpg", ".jpeg", ".webp", ".tiff", ".bmp")
+            ):
                 file_path = os.path.join(folder_path, filename)
                 self.add_to_queue(file_path)
                 count += 1
@@ -709,11 +911,15 @@ class App:
             # Load the first image for preview if no image is currently loaded
             if not self.current_file and count > 0:
                 for filename in os.listdir(folder_path):
-                    if filename.lower().endswith((".png", ".jpg", ".jpeg", ".webp", ".tiff", ".bmp")):
+                    if filename.lower().endswith(
+                        (".png", ".jpg", ".jpeg", ".webp", ".tiff", ".bmp")
+                    ):
                         self.load_image(os.path.join(folder_path, filename))
                         break
         else:
-            messagebox.showinfo("No Images", "No supported image files found in the selected folder.")
+            messagebox.showinfo(
+                "No Images", "No supported image files found in the selected folder."
+            )
 
     def add_to_queue(self, file_path):
         """Add a file to the processing queue"""
@@ -754,7 +960,9 @@ class App:
 
         # Start processing thread
         self.is_processing = True
-        threading.Thread(target=self.process_files_thread, args=(files,), daemon=True).start()
+        threading.Thread(
+            target=self.process_files_thread, args=(files,), daemon=True
+        ).start()
 
     def process_files_thread(self, files):
         """Process files in a separate thread"""
@@ -767,16 +975,29 @@ class App:
 
         for item_id, file_path in files:
             if not os.path.exists(file_path):
-                self.root.after(0,
-                                lambda id=item_id: self.queue_list.item(id, values=(file_path, "File not found")))
+                self.root.after(
+                    0,
+                    lambda id=item_id: self.queue_list.item(
+                        id, values=(file_path, "File not found")
+                    ),
+                )
                 errors += 1
                 continue
 
             try:
                 # Update status
-                self.root.after(0, lambda: self.status_label.config(
-                    text=f"Processing {os.path.basename(file_path)}..."))
-                self.root.after(0, lambda id=item_id: self.queue_list.item(id, values=(file_path, "Processing")))
+                self.root.after(
+                    0,
+                    lambda: self.status_label.config(
+                        text=f"Processing {os.path.basename(file_path)}..."
+                    ),
+                )
+                self.root.after(
+                    0,
+                    lambda id=item_id: self.queue_list.item(
+                        id, values=(file_path, "Processing")
+                    ),
+                )
 
                 # Load image
                 img: PILImage = self.processor.load_image(file_path)
@@ -797,17 +1018,26 @@ class App:
                     self.output_format_var.get(),
                     self.output_quality_var.get(),
                     self.output_optimize_var.get(),
-                    self.preserve_metadata_var.get()
+                    self.preserve_metadata_var.get(),
                 )
 
                 # Update queue item
-                self.root.after(0, lambda id=item_id: self.queue_list.item(id, values=(file_path, "Completed")))
+                self.root.after(
+                    0,
+                    lambda id=item_id: self.queue_list.item(
+                        id, values=(file_path, "Completed")
+                    ),
+                )
                 processed += 1
 
             except Exception as e:
                 print(f"Error processing {file_path}: {str(e)}")
-                self.root.after(0, lambda id=item_id, err=str(e): self.queue_list.item(id, values=(
-                    file_path, f"Error: {err[:20]}...")))
+                self.root.after(
+                    0,
+                    lambda id=item_id, err=str(e): self.queue_list.item(
+                        id, values=(file_path, f"Error: {err[:20]}...")
+                    ),
+                )
                 errors += 1
 
             # Update progress
@@ -844,7 +1074,7 @@ class App:
                 self.output_format_var.get(),
                 self.output_quality_var.get(),
                 self.output_optimize_var.get(),
-                self.preserve_metadata_var.get()
+                self.preserve_metadata_var.get(),
             )
 
             messagebox.showinfo("Success", f"Image saved to:\n{saved_path}")
@@ -876,8 +1106,8 @@ class App:
                     ("WebP files", "*.webp"),
                     ("TIFF files", "*.tiff"),
                     ("BMP files", "*.bmp"),
-                    ("All files", "*.*")
-                ]
+                    ("All files", "*.*"),
+                ],
             )
 
             if output_path:
@@ -888,7 +1118,7 @@ class App:
                     self.output_format_var.get(),
                     self.output_quality_var.get(),
                     self.output_optimize_var.get(),
-                    self.preserve_metadata_var.get()
+                    self.preserve_metadata_var.get(),
                 )
 
                 messagebox.showinfo("Success", f"Image saved to:\n{output_path}")
@@ -899,8 +1129,16 @@ class App:
     def get_processing_options(self):
         """Get all processing options as a dictionary"""
         try:
-            width = int(self.width_var.get()) if self.resize_var.get() and self.width_var.get() else 0
-            height = int(self.height_var.get()) if self.resize_var.get() and self.height_var.get() else 0
+            width = (
+                int(self.width_var.get())
+                if self.resize_var.get() and self.width_var.get()
+                else 0
+            )
+            height = (
+                int(self.height_var.get())
+                if self.resize_var.get() and self.height_var.get()
+                else 0
+            )
         except ValueError:
             width, height = 0, 0
 
@@ -920,7 +1158,7 @@ class App:
             "adjust_alpha": self.adjust_alpha_var.get(),
             "alpha_value": self.alpha_value_var.get(),
             "replace_background": self.replace_bg_var.get(),
-            "replacement_color": self.replacement_color_rgb
+            "replacement_color": self.replacement_color_rgb,
         }
 
     def get_output_path(self, input_path):
@@ -965,8 +1203,12 @@ class App:
             counter = 1
             while os.path.exists(output_path):
                 output_filename = pattern.replace("{filename}", base_name)
-                output_filename = output_filename.replace("{date}", now.strftime("%Y%m%d"))
-                output_filename = output_filename.replace("{time}", now.strftime("%H%M%S"))
+                output_filename = output_filename.replace(
+                    "{date}", now.strftime("%Y%m%d")
+                )
+                output_filename = output_filename.replace(
+                    "{time}", now.strftime("%H%M%S")
+                )
                 output_filename = output_filename.replace("{counter}", str(counter))
                 output_filename = f"{output_filename}.{self.output_format_var.get()}"
                 output_path = os.path.join(output_dir, output_filename)
@@ -991,11 +1233,13 @@ class App:
             # Get original preview
             original_preview = self.processor.get_image_preview(self.original_image)
             if original_preview:
-                self.original_preview = original_preview  # Keep reference to prevent garbage collection
+                self.original_preview = (
+                    original_preview  # Keep reference to prevent garbage collection
+                )
                 self.original_canvas.create_image(
                     self.original_canvas.winfo_width() // 2,
                     self.original_canvas.winfo_height() // 2,
-                    image=self.original_preview
+                    image=self.original_preview,
                 )
 
             # Process image with current settings
@@ -1006,11 +1250,13 @@ class App:
             # Get processed preview
             processed_preview = self.processor.get_image_preview(processed)
             if processed_preview:
-                self.processed_preview = processed_preview  # Keep reference to prevent garbage collection
+                self.processed_preview = (
+                    processed_preview  # Keep reference to prevent garbage collection
+                )
                 self.processed_canvas.create_image(
                     self.processed_canvas.winfo_width() // 2,
                     self.processed_canvas.winfo_height() // 2,
-                    image=self.processed_preview
+                    image=self.processed_preview,
                 )
 
         except Exception as e:
@@ -1026,7 +1272,8 @@ class App:
         state = "normal" if self.resize_var.get() else "disabled"
         for widget in self.settings_frame.winfo_children():
             if isinstance(widget, ttk.Entry) and (
-                    widget.winfo_name() == "width" or widget.winfo_name() == "height"):
+                widget.winfo_name() == "width" or widget.winfo_name() == "height"
+            ):
                 widget.configure(state=state)
 
         self.update_preview()
@@ -1036,7 +1283,9 @@ class App:
         state = "normal" if self.crop_var.get() else "disabled"
         # Enable/disable crop sliders
         for widget in self.advanced_frame.winfo_children():
-            if isinstance(widget, ttk.Scale) and widget.winfo_name().startswith("crop_"):
+            if isinstance(widget, ttk.Scale) and widget.winfo_name().startswith(
+                "crop_"
+            ):
                 widget.configure(state=state)
 
         self.update_preview()
@@ -1056,7 +1305,10 @@ class App:
         state = "normal" if self.replace_bg_var.get() else "disabled"
         # Enable/disable background color picker
         for widget in self.advanced_frame.winfo_children():
-            if isinstance(widget, ttk.Button) and widget.winfo_name() == "bg_color_picker":
+            if (
+                isinstance(widget, ttk.Button)
+                and widget.winfo_name() == "bg_color_picker"
+            ):
                 widget.configure(state=state)
 
         self.update_preview()
@@ -1081,14 +1333,18 @@ class App:
 
     def browse_output_dir(self):
         """Browse for output directory"""
-        directory = filedialog.askdirectory(initialdir=self.output_dir_var.get() or os.path.expanduser("~"))
+        directory = filedialog.askdirectory(
+            initialdir=self.output_dir_var.get() or os.path.expanduser("~")
+        )
         if directory:
             self.output_dir_var.set(directory)
 
     # Preset management
     def save_preset(self):
         """Save current settings as a preset"""
-        preset_name = simpledialog.askstring("Save Preset", "Enter a name for this preset:")
+        preset_name = simpledialog.askstring(
+            "Save Preset", "Enter a name for this preset:"
+        )
         if preset_name:
             # Get current settings
             preset = {
@@ -1110,7 +1366,7 @@ class App:
                 "replacement_color": self.replacement_color_var.get(),
                 "output_format": self.output_format_var.get(),
                 "output_quality": self.output_quality_var.get(),
-                "output_optimize": self.output_optimize_var.get()
+                "output_optimize": self.output_optimize_var.get(),
             }
 
             # Save to settings
@@ -1121,7 +1377,9 @@ class App:
             # Update presets menu
             self.update_presets_menu()
 
-            messagebox.showinfo("Preset Saved", f"Preset '{preset_name}' has been saved.")
+            messagebox.showinfo(
+                "Preset Saved", f"Preset '{preset_name}' has been saved."
+            )
 
     def load_preset(self, preset_name):
         """Load a preset"""
@@ -1139,7 +1397,7 @@ class App:
                 "replace_background": False,
                 "output_format": "png",
                 "output_quality": 95,
-                "output_optimize": True
+                "output_optimize": True,
             },
             "logo_white": {
                 "background_mode": "white",
@@ -1151,7 +1409,7 @@ class App:
                 "replace_background": False,
                 "output_format": "png",
                 "output_quality": 95,
-                "output_optimize": True
+                "output_optimize": True,
             },
             "product": {
                 "background_mode": "white",
@@ -1166,8 +1424,8 @@ class App:
                 "replacement_color": "#FFFFFF",
                 "output_format": "png",
                 "output_quality": 90,
-                "output_optimize": True
-            }
+                "output_optimize": True,
+            },
         }
 
         # Get preset (from saved or default)
@@ -1218,8 +1476,10 @@ class App:
         # Add saved presets
         presets = self._settings.get("presets")
         for preset_name in presets:
-            self.presets_menu.add_command(label=preset_name,
-                                          command=lambda name=preset_name: self.load_preset(name))
+            self.presets_menu.add_command(
+                label=preset_name,
+                command=lambda name=preset_name: self.load_preset(name),
+            )
 
     def manage_presets(self):
         """Open a dialog to manage presets"""
@@ -1248,13 +1508,17 @@ class App:
         button_frame = ttk.Frame(preset_manager)
         button_frame.pack(fill=tk.X, padx=10, pady=10)
 
-        ttk.Button(button_frame, text="Load",
-                   command=lambda: self.load_preset_from_manager(preset_list, preset_manager)).pack(
-            side=tk.LEFT, padx=5)
-        ttk.Button(button_frame, text="Delete",
-                   command=lambda: self.delete_preset(preset_list)).pack(side=tk.LEFT, padx=5)
-        ttk.Button(button_frame, text="Close",
-                   command=preset_manager.destroy).pack(side=tk.RIGHT, padx=5)
+        ttk.Button(
+            button_frame,
+            text="Load",
+            command=lambda: self.load_preset_from_manager(preset_list, preset_manager),
+        ).pack(side=tk.LEFT, padx=5)
+        ttk.Button(
+            button_frame, text="Delete", command=lambda: self.delete_preset(preset_list)
+        ).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="Close", command=preset_manager.destroy).pack(
+            side=tk.RIGHT, padx=5
+        )
 
     def load_preset_from_manager(self, preset_list, manager):
         """Load a preset from the preset manager"""
@@ -1269,8 +1533,10 @@ class App:
         selection = preset_list.curselection()
         if selection:
             preset_name = preset_list.get(selection[0])
-            confirm = messagebox.askyesno("Confirm Delete",
-                                          f"Are you sure you want to delete the preset '{preset_name}'?")
+            confirm = messagebox.askyesno(
+                "Confirm Delete",
+                f"Are you sure you want to delete the preset '{preset_name}'?",
+            )
             if confirm:
                 presets = self._settings.get("presets")
                 if preset_name in presets:
@@ -1302,22 +1568,27 @@ class App:
         theme_frame.pack(fill=tk.X, padx=10, pady=5)
 
         theme_var = tk.StringVar(value=self._settings.get("theme"))
-        ttk.Radiobutton(theme_frame, text="Light Theme", variable=theme_var,
-                        value="light").pack(anchor="w", padx=10, pady=2)
-        ttk.Radiobutton(theme_frame, text="Dark Theme", variable=theme_var,
-                        value="dark").pack(anchor="w", padx=10, pady=2)
+        ttk.Radiobutton(
+            theme_frame, text="Light Theme", variable=theme_var, value="light"
+        ).pack(anchor="w", padx=10, pady=2)
+        ttk.Radiobutton(
+            theme_frame, text="Dark Theme", variable=theme_var, value="dark"
+        ).pack(anchor="w", padx=10, pady=2)
 
         # Default format
         format_frame = ttk.LabelFrame(general_frame, text="Default Output Format")
         format_frame.pack(fill=tk.X, padx=10, pady=5)
 
         format_var = tk.StringVar(value=self._settings.get("default_format"))
-        ttk.Radiobutton(format_frame, text="PNG", variable=format_var,
-                        value="png").pack(anchor="w", padx=10, pady=2)
-        ttk.Radiobutton(format_frame, text="JPEG", variable=format_var,
-                        value="jpg").pack(anchor="w", padx=10, pady=2)
-        ttk.Radiobutton(format_frame, text="WebP", variable=format_var,
-                        value="webp").pack(anchor="w", padx=10, pady=2)
+        ttk.Radiobutton(
+            format_frame, text="PNG", variable=format_var, value="png"
+        ).pack(anchor="w", padx=10, pady=2)
+        ttk.Radiobutton(
+            format_frame, text="JPEG", variable=format_var, value="jpg"
+        ).pack(anchor="w", padx=10, pady=2)
+        ttk.Radiobutton(
+            format_frame, text="WebP", variable=format_var, value="webp"
+        ).pack(anchor="w", padx=10, pady=2)
 
         # File handling tab
         file_frame = ttk.Frame(pref_notebook)
@@ -1325,22 +1596,30 @@ class App:
 
         # Metadata option
         metadata_var = tk.BooleanVar(value=self._settings.get("preserve_metadata"))
-        ttk.Checkbutton(file_frame, text="Preserve image metadata by default",
-                        variable=metadata_var).pack(anchor="w", padx=10, pady=5)
+        ttk.Checkbutton(
+            file_frame, text="Preserve image metadata by default", variable=metadata_var
+        ).pack(anchor="w", padx=10, pady=5)
 
         # Overwrite option
         overwrite_var = tk.BooleanVar(value=self._settings.get("overwrite_existing"))
-        ttk.Checkbutton(file_frame, text="Overwrite existing files by default",
-                        variable=overwrite_var).pack(anchor="w", padx=10, pady=5)
+        ttk.Checkbutton(
+            file_frame,
+            text="Overwrite existing files by default",
+            variable=overwrite_var,
+        ).pack(anchor="w", padx=10, pady=5)
 
         # Default naming pattern
         naming_frame = ttk.LabelFrame(file_frame, text="Default Naming Pattern")
         naming_frame.pack(fill=tk.X, padx=10, pady=5)
 
         naming_var = tk.StringVar(value=self._settings.get("custom_naming"))
-        ttk.Entry(naming_frame, textvariable=naming_var).pack(fill=tk.X, padx=10, pady=5)
-        ttk.Label(naming_frame, text="Available variables: {filename}, {date}, {time}, {counter}").pack(
-            anchor="w", padx=10, pady=2)
+        ttk.Entry(naming_frame, textvariable=naming_var).pack(
+            fill=tk.X, padx=10, pady=5
+        )
+        ttk.Label(
+            naming_frame,
+            text="Available variables: {filename}, {date}, {time}, {counter}",
+        ).pack(anchor="w", padx=10, pady=2)
 
         # Save button
         def save_preferences():
@@ -1349,9 +1628,9 @@ class App:
                 "default_format": format_var.get(),
                 "preserve_metadata": metadata_var.get(),
                 "overwrite_existing": overwrite_var.get(),
-                "custom_naming": naming_var.get()
+                "custom_naming": naming_var.get(),
             }
-            
+
             for key, value in settings.items():
                 self._settings.set(key, value)
 
@@ -1367,16 +1646,24 @@ class App:
             prefs.destroy()
             messagebox.showinfo("Preferences", "Preferences have been saved.")
 
-        ttk.Button(prefs, text="Save", command=save_preferences).pack(side=tk.RIGHT, padx=10, pady=10)
-        ttk.Button(prefs, text="Cancel", command=prefs.destroy).pack(side=tk.RIGHT, padx=0, pady=10)
+        ttk.Button(prefs, text="Save", command=save_preferences).pack(
+            side=tk.RIGHT, padx=10, pady=10
+        )
+        ttk.Button(prefs, text="Cancel", command=prefs.destroy).pack(
+            side=tk.RIGHT, padx=0, pady=10
+        )
 
     def show_documentation(self):
         """Show documentation"""
         # Try to open documentation in web browser
         try:
-            webbrowser.open("https://github.com/vinayhr5/enhanced-image-converter/blob/main/README.md")
+            webbrowser.open(
+                "https://github.com/vinayhr5/enhanced-image-converter/blob/main/README.md"
+            )
         except Exception as e:
-            self._logger.error(f"Failed to open web browser for documentation: {e}", exc_info=True)
+            self._logger.error(
+                f"Failed to open web browser for documentation: {e}", exc_info=True
+            )
             # If web browser can't be opened, show documentation in a dialog
             doc = tk.Toplevel(self.root)
             doc.title("Documentation")
@@ -1467,20 +1754,27 @@ class App:
                 logo = logo.subsample(6, 6)  # Reduce by half in both dimensions
                 logo_label = ttk.Label(about, image=logo)
                 # Keep a reference to prevent garbage collection
-                logo_label.image = logo # type: ignore
+                logo_label.image = logo  # type: ignore
                 logo_label.pack(pady=10)
         except Exception as e:
             self._logger.error(f"Failed to load about icon: {e}", exc_info=True)
 
         # App info
-        ttk.Label(about, text="Background Remover and Color Inverter",
-                  font=("Helvetica", 14, "bold")).pack(pady=5)
+        ttk.Label(
+            about,
+            text="Background Remover and Color Inverter",
+            font=("Helvetica", 14, "bold"),
+        ).pack(pady=5)
         ttk.Label(about, text=f"Version {APP_VERSION}").pack()
         ttk.Label(about, text=CREATOR_STRING).pack(pady=5)
 
         # Description
-        description = ttk.Label(about, text="A tool for removing backgrounds from images and inverting colors.",
-                                wraplength=350, justify="center")
+        description = ttk.Label(
+            about,
+            text="A tool for removing backgrounds from images and inverting colors.",
+            wraplength=350,
+            justify="center",
+        )
         description.pack(pady=10)
 
         # Close button
