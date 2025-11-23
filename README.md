@@ -4,7 +4,6 @@ A powerful tool for removing backgrounds from images, inverting colors, and batc
 
 ![image](https://github.com/user-attachments/assets/73022e02-1720-49b3-be66-c63d4abf9e42)
 
-
 ## Features
 
 - **Background Removal**: Automatically remove black, white, or custom color backgrounds
@@ -21,11 +20,14 @@ A powerful tool for removing backgrounds from images, inverting colors, and batc
 
 1. Ensure you have Python 3.6 or higher installed
 2. Install required dependencies:
-   ```
+
+   ```sh
    pip install Pillow
    ```
+
 3. Download the latest release or clone the repository:
-   ```
+
+   ```sh
    git clone https://github.com/vinayhr5/enhanced-image-converter.git
    ```
 
@@ -34,9 +36,11 @@ A powerful tool for removing backgrounds from images, inverting colors, and batc
 ### Basic Usage
 
 1. Run the application:
-   ```
+
+   ```sh
    python enhanced_image_converter.py
    ```
+
 2. Open an image file using File > Open File or the "Open File" button
 3. Select the background type (black, white, or custom color)
 4. Adjust the tolerance slider to control how much of the background is removed
@@ -46,15 +50,19 @@ A powerful tool for removing backgrounds from images, inverting colors, and batc
 ### Advanced Features
 
 #### Resize
+
 - Check "Resize Image" and enter the desired width and height in pixels
 
 #### Crop
+
 - Check "Crop Image" and use the sliders to adjust the crop area
 
 #### Transparency
+
 - Check "Adjust Transparency" and use the slider to control the overall transparency
 
 #### Background Replacement
+
 - Check "Replace Background" and choose a color to replace the transparent areas
 
 ### Batch Processing
@@ -82,6 +90,7 @@ A powerful tool for removing backgrounds from images, inverting colors, and batc
 ## Configuration
 
 The application saves your settings in `~/.image_converter_settings.json`, including:
+
 - Recent files
 - Presets
 - Last output directory
@@ -97,7 +106,7 @@ The application saves your settings in `~/.image_converter_settings.json`, inclu
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-
 ## Acknowledgements
+
 - Created by Vinay Ahari
 - Uses Pillow library for image processing
