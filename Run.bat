@@ -17,8 +17,8 @@ python main.py
 REM Check error level
 IF %ERRORLEVEL% NEQ 0 (
     ECHO An error occurred while running the application. Please check the messages above.
+    REM PAUSE to keep the window open and allow user to see the error
+    PAUSE
 )
 
-REM PAUSE to keep the window open
-PAUSE
 EXIT /B %ERRORLEVEL%
