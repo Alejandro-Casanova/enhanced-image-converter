@@ -347,13 +347,17 @@ class App:
         tolerance_frame.pack(fill=tk.X, padx=10, pady=5)
 
         ttk.Label(tolerance_frame, text="Tolerance:").pack(side=tk.LEFT, padx=5)
+
+        def update_tolerance_scale(value: str):
+            self.tolerance_var.set(int(float(value)))
+            self.update_preview()
+
         ttk.Scale(
             tolerance_frame,
             from_=0,
             to=100,
             orient=tk.HORIZONTAL,
-            variable=self.tolerance_var,
-            command=lambda _: self.update_preview(),
+            command=update_tolerance_scale
         ).pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
         ttk.Label(tolerance_frame, textvariable=self.tolerance_var).pack(
             side=tk.LEFT, padx=5
@@ -439,49 +443,65 @@ class App:
         ttk.Label(crop_controls, text="Left:").grid(
             row=0, column=0, padx=5, pady=2, sticky="w"
         )
+
+        def update_crop_left_scale(value: str):
+            self.crop_left_var.set(int(float(value)))
+            self.update_preview()
+        
         ttk.Scale(
             crop_controls,
             from_=0,
             to=100,
             orient=tk.HORIZONTAL,
-            variable=self.crop_left_var,
-            command=lambda _: self.update_preview(),
+            command=update_crop_left_scale,
         ).grid(row=0, column=1, padx=5, pady=2, sticky="ew")
 
         ttk.Label(crop_controls, text="Top:").grid(
             row=1, column=0, padx=5, pady=2, sticky="w"
         )
+
+        def update_crop_top_scale(value: str):
+            self.crop_top_var.set(int(float(value)))
+            self.update_preview()
+
         ttk.Scale(
             crop_controls,
             from_=0,
             to=100,
             orient=tk.HORIZONTAL,
-            variable=self.crop_top_var,
-            command=lambda _: self.update_preview(),
+            command=update_crop_top_scale,
         ).grid(row=1, column=1, padx=5, pady=2, sticky="ew")
 
         ttk.Label(crop_controls, text="Right:").grid(
             row=2, column=0, padx=5, pady=2, sticky="w"
         )
+
+        def update_crop_right_scale(value: str):
+            self.crop_right_var.set(int(float(value)))
+            self.update_preview()
+
         ttk.Scale(
             crop_controls,
             from_=0,
             to=100,
             orient=tk.HORIZONTAL,
-            variable=self.crop_right_var,
-            command=lambda _: self.update_preview(),
+            command=update_crop_right_scale,
         ).grid(row=2, column=1, padx=5, pady=2, sticky="ew")
 
         ttk.Label(crop_controls, text="Bottom:").grid(
             row=3, column=0, padx=5, pady=2, sticky="w"
         )
+
+        def update_crop_bottom_scale(value: str):
+            self.crop_bottom_var.set(int(float(value)))
+            self.update_preview()
+        
         ttk.Scale(
             crop_controls,
             from_=0,
             to=100,
             orient=tk.HORIZONTAL,
-            variable=self.crop_bottom_var,
-            command=lambda _: self.update_preview(),
+            command=update_crop_bottom_scale,
         ).grid(row=3, column=1, padx=5, pady=2, sticky="ew")
 
         crop_controls.columnconfigure(1, weight=1)
@@ -502,13 +522,17 @@ class App:
         alpha_slider_frame.pack(fill=tk.X, padx=10, pady=5)
 
         ttk.Label(alpha_slider_frame, text="Alpha:").pack(side=tk.LEFT, padx=5)
+
+        def update_alpha_scale(value: str):
+            self.alpha_value_var.set(int(float(value)))
+            self.update_preview()
+
         ttk.Scale(
             alpha_slider_frame,
             from_=0,
             to=255,
             orient=tk.HORIZONTAL,
-            variable=self.alpha_value_var,
-            command=lambda _: self.update_preview(),
+            command=update_alpha_scale,
         ).pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
         ttk.Label(alpha_slider_frame, textvariable=self.alpha_value_var).pack(
             side=tk.LEFT, padx=5
@@ -564,12 +588,16 @@ class App:
         quality_frame.pack(fill=tk.X, padx=10, pady=5)
 
         ttk.Label(quality_frame, text="Quality:").pack(side=tk.LEFT, padx=5)
+        
+        def update_quality_scale(value: str):
+            self.output_quality_var.set(int(float(value)))
+
         ttk.Scale(
             quality_frame,
             from_=1,
             to=100,
             orient=tk.HORIZONTAL,
-            variable=self.output_quality_var,
+            command=update_quality_scale,
         ).pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
         ttk.Label(quality_frame, textvariable=self.output_quality_var).pack(
             side=tk.LEFT, padx=5
@@ -1283,8 +1311,9 @@ class App:
         state = "normal" if self.crop_var.get() else "disabled"
         # Enable/disable crop sliders
         for widget in self.advanced_frame.winfo_children():
-            if isinstance(widget, ttk.Scale) and widget.winfo_name().startswith(
-                "crop_"
+            if (
+                isinstance(widget, ttk.Scale) 
+                and widget.winfo_name().startswith("crop_")
             ):
                 widget.configure(state=state)
 
