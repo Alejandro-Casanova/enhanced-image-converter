@@ -1310,7 +1310,11 @@ class App:
 
             # Process image with current settings
             options = self.get_processing_options()
-            processed = self.processor.process_image(self.original_image, options)
+            processed: PILImage = self.processor.process_image(
+                image=self.original_image, 
+                options=options, 
+                preview=True
+            )
             self.processor.processed_image = processed  # Store for later use
 
             # Get processed preview

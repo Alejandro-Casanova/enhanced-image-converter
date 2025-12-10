@@ -23,7 +23,7 @@ class ImageProcessor:
         except Exception as e:
             raise Exception(f"Failed to load image: {str(e)}")
 
-    def process_image(self, image: PILImage, options):
+    def process_image(self, image: PILImage, options: dict, preview: bool = False) -> PILImage:
         """Process an image with the given options"""
         try:
             # Make a copy to avoid modifying the original
@@ -31,16 +31,17 @@ class ImageProcessor:
 
             # Resize if needed
             if options["resize"] and options["width"] > 0 and options["height"] > 0:
-                img = img.resize((options["width"], options["height"]), Image.LANCZOS)
+                img = img.resize((options["width"], options["height"]), Image.Resampling.LANCZOS)
 
             # Crop if needed
             if options["crop"]:
                 img = img.crop((options["crop_left"], options["crop_top"],
                     options["crop_right"], options["crop_bottom"]))
 
-            # Add border
-            img_draw: PILImageDraw = ImageDraw.Draw(img)  
-            img_draw.rectangle((0, 0, img.width - 1, img.height - 1), outline ="red")
+            # Add border in case of preview mode
+            if preview:
+                img_draw: PILImageDraw = ImageDraw.Draw(img)  
+                img_draw.rectangle((0, 0, img.width - 1, img.height - 1), outline ="red")
 
             # Process transparency and colors
             if options["background_mode"] == "custom":
