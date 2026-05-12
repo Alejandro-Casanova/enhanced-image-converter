@@ -8,14 +8,20 @@ IF NOT EXIST ".venv" (
     ECHO Virtual environment created.
     SET FIRST_TIME=1
 
-    REM Activate the existing virtual environment
+    REM Activate the virtual environment
     CALL .venv\Scripts\activate.bat
     ECHO Virtual environment activated.
 
+    REM Upgrade Pip
+    CALL pip install --upgrade pip
+
     REM Install required packages
     ECHO Installing required packages...
-    pip install -r requirements.txt
+    CALL pip install -r requirements.txt
     ECHO Required packages installed.
+
+    REM Deactivate the virtual environment
+    CALL deactivate
 ) ELSE (
     ECHO Virtual environment already set up. Skipping package installation.
 )
